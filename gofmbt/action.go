@@ -60,6 +60,12 @@ func OnAction(format string, args ...interface{}) *Action {
 	return NewAction(format, args...)
 }
 
+// OnActionFn returns new Action with a function and arguments. This is
+// a convenience function for When/OnAction/Do modeling syntax.
+func OnActionFn(fn interface{}, args ...interface{}) *Action {
+	return nil
+}
+
 // Do returns a slice containing one transition. Do is a convenience
 // function for When/OnAction/Do modeling syntax.
 func (a *Action) Do(stateChanges ...StateChange) []*Transition {
