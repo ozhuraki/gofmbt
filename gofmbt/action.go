@@ -16,6 +16,7 @@ package gofmbt
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // Action, associated with a state change, specifies what to execute
@@ -63,6 +64,54 @@ func OnAction(format string, args ...interface{}) *Action {
 // OnActionFn returns new Action with a function and arguments. This is
 // a convenience function for When/OnAction/Do modeling syntax.
 func OnActionFn(fn interface{}, args ...interface{}) *Action {
+        var results []interface{}
+	var err error
+
+	v := reflect.ValueOf(fn)
+	if v.Kind() != reflect.Func {
+		return nil, fmt.Errorf("fn is not a function")
+	}
+
+	if !v.IsValid() {
+		return nil, fmt.Errorf("invalid function")
+	}
+
+	// Build reflect.Value args
+	in := make([]reflect.Value, len(args))
+	for i, a := range args {
+		in[i] = reflect.ValueOf(a)
+	}
+
+	// Optional: runtime check for argument count/type compatibility
+	if v.Type().IsVariadic() {
+		// for variadic functions, ensure at least len(args) >= NumIn() - 1
+		min := v.Type().NumIn() - 1
+		if len(in) < min {
+			return nil, fmt.Errorf("not enough arguments: need at least %d", min)
+		}
+	} else {
+		if len(in) != v.Type().NumIn() {
+			return nil, fmt.Errorf("argument count mismatch: need %d, got %d", v.Type().NumIn(), len(in))
+		}
+		// check types
+		for i := 0; i < v.Type().NumIn(); i++ {
+			if in[i].Type() != v.Type().In(i) {
+				// allow assignable types
+				if !in[i].Type().AssignableTo(v.Type().In(i)) {
+					return nil, fmt.Errorf("argument %d: %s not assignable to %s", i, in[i].Type(), v.Type().In(i))
+				}
+			}
+		}
+	}
+
+	out := v.Call(in)
+
+	results = make([]interface{}, len(out))
+	for i, r := range out {
+		results[i] = r.Interface()
+	}
+	// return results, nil
+
 	return nil
 }
 
