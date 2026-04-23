@@ -64,16 +64,15 @@ func OnAction(format string, args ...interface{}) *Action {
 // OnActionFn returns new Action with a function and arguments. This is
 // a convenience function for When/OnAction/Do modeling syntax.
 func OnActionFn(fn interface{}, args ...interface{}) *Action {
-        var results []interface{}
-	var err error
-
 	v := reflect.ValueOf(fn)
 	if v.Kind() != reflect.Func {
-		return nil, fmt.Errorf("fn is not a function")
+		fmt.Println("error: fn is not a function")
+		return nil
 	}
 
 	if !v.IsValid() {
-		return nil, fmt.Errorf("invalid function")
+		fmt.Println("error: invalid function")
+		return nil
 	}
 
 	// Build reflect.Value args
@@ -87,18 +86,21 @@ func OnActionFn(fn interface{}, args ...interface{}) *Action {
 		// for variadic functions, ensure at least len(args) >= NumIn() - 1
 		min := v.Type().NumIn() - 1
 		if len(in) < min {
-			return nil, fmt.Errorf("not enough arguments: need at least %d", min)
+			fmt.Printf("error: not enough arguments: need at least %d\n", min)
+			return nil
 		}
 	} else {
 		if len(in) != v.Type().NumIn() {
-			return nil, fmt.Errorf("argument count mismatch: need %d, got %d", v.Type().NumIn(), len(in))
+			fmt.Printf("error: argument count mismatch: need %d, got %d\n", v.Type().NumIn(), len(in))
+			return nil
 		}
 		// check types
 		for i := 0; i < v.Type().NumIn(); i++ {
 			if in[i].Type() != v.Type().In(i) {
 				// allow assignable types
 				if !in[i].Type().AssignableTo(v.Type().In(i)) {
-					return nil, fmt.Errorf("argument %d: %s not assignable to %s", i, in[i].Type(), v.Type().In(i))
+					fmt.Printf("error: argument %d: %s not assignable to %s\n", i, in[i].Type(), v.Type().In(i))
+					return nil
 				}
 			}
 		}
@@ -106,7 +108,7 @@ func OnActionFn(fn interface{}, args ...interface{}) *Action {
 
 	out := v.Call(in)
 
-	results = make([]interface{}, len(out))
+	results := make([]interface{}, len(out))
 	for i, r := range out {
 		results[i] = r.Interface()
 	}
