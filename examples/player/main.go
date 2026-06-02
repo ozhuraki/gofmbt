@@ -17,7 +17,7 @@ package main
 import (
 	"fmt"
 
-	m "github.com/askervin/gofmbt/gofmbt"
+	m "github.com/ozhuraki/gofmbt/gofmbt"
 )
 
 type PlayerState struct {
