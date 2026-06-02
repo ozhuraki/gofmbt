@@ -24,6 +24,7 @@ type Action struct {
 	name   string
 	format string
 	args   []interface{}
+	fn     map[string]any
 }
 
 // NewAction creates a new action.
@@ -32,7 +33,12 @@ func NewAction(format string, args ...interface{}) *Action {
 		format: format,
 		args:   args,
 		name:   fmt.Sprintf(format, args...),
+		fn:     make(map[string]any),
 	}
+}
+
+func (a *Action) Register(s string, fn any) {
+
 }
 
 // String returns a string representation of an action.
