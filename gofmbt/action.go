@@ -24,6 +24,7 @@ type Action struct {
 	name   string
 	format string
 	args   []interface{}
+	fn     map[string]any
 }
 
 // NewAction creates a new action.
@@ -32,7 +33,13 @@ func NewAction(format string, args ...interface{}) *Action {
 		format: format,
 		args:   args,
 		name:   fmt.Sprintf(format, args...),
+		fn:     make(map[string]any),
 	}
+}
+
+func (a *Action) Register(fn any) *Action {
+	a.fn[a.name] = fn
+	return a
 }
 
 // String returns a string representation of an action.
@@ -63,6 +70,10 @@ func OnAction(format string, args ...interface{}) *Action {
 // Do returns a slice containing one transition. Do is a convenience
 // function for When/OnAction/Do modeling syntax.
 func (a *Action) Do(stateChanges ...StateChange) []*Transition {
+	if fn, exists := a.fn[a.name]; exists {
+		fn = fn
+	}
+
 	stateChange := func(s State) State {
 		for _, sc := range stateChanges {
 			s = sc(s)
