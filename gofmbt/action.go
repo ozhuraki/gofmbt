@@ -24,7 +24,7 @@ type Action struct {
 	name   string
 	format string
 	args   []interface{}
-	fn     map[string]any
+	fn     map[string]any // registered functions keyed by action name
 }
 
 // NewAction creates a new action.
@@ -37,6 +37,9 @@ func NewAction(format string, args ...interface{}) *Action {
 	}
 }
 
+// Register associates fn with this action. The function is stored
+// under the action's name and can later be retrieved and executed
+// when the action is performed (see Do).
 func (a *Action) Register(fn any) *Action {
 	a.fn[a.name] = fn
 	return a
@@ -71,6 +74,8 @@ func OnAction(format string, args ...interface{}) *Action {
 // function for When/OnAction/Do modeling syntax.
 func (a *Action) Do(stateChanges ...StateChange) []*Transition {
 	if fn, exists := a.fn[a.name]; exists {
+		// TODO: invoke fn with the appropriate arguments once
+		// the calling convention is defined; currently a no-op placeholder.
 		fn = fn
 	}
 
