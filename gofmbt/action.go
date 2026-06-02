@@ -38,7 +38,7 @@ func NewAction(format string, args ...interface{}) *Action {
 }
 
 func (a *Action) Register(s string, fn any) {
-
+	a.fn[s] = fn
 }
 
 // String returns a string representation of an action.
