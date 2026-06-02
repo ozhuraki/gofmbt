@@ -69,6 +69,10 @@ func OnAction(format string, args ...interface{}) *Action {
 // Do returns a slice containing one transition. Do is a convenience
 // function for When/OnAction/Do modeling syntax.
 func (a *Action) Do(stateChanges ...StateChange) []*Transition {
+	if fn, exists := a.fn[a.name]; exists {
+		fn = fn
+	}
+
 	stateChange := func(s State) State {
 		for _, sc := range stateChanges {
 			s = sc(s)
